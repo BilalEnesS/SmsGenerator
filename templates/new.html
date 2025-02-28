@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Reklam Oluşturucu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .header {
+            background-color: #ffc107;
+            color: #333;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        .form-select, .form-control {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background-color: #ffc107;
+            border: none;
+            color: #333;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+        .btn-primary:hover {
+            background-color: #e0a800;
+            color: #333;
+        }
+        .result-card {
+            display: none;
+            margin-top: 30px;
+        }
+        .loader {
+            display: none;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ffc107;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .sms-container {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .char-counter {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .turkcell-logo {
+            height: 40px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <div class="container">
+            <h1>
+                SMS Reklam Oluşturucu
+            </h1>
+            <p class="lead">Turkcell müşterilerine özel kampanyalarınız için SMS reklamları oluşturun</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card p-4">
+                    <form id="smsForm">
+                        <h4 class="mb-4">Firma Bilgileri</h4>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Veri Kaynağı</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="data_source" id="url_source" value="url" checked>
+                                <label class="form-check-label" for="url_source">
+                                    Web Sitesi URL'si
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="data_source" id="manual_source" value="manual">
+                                <label class="form-check-label" for="manual_source">
+                                    Manuel Giriş
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="urlSection" class="mb-3">
+                            <label for="url" class="form-label">Web Sitesi URL'si</label>
+                            <input type="url" class="form-control" id="url" name="url" placeholder="https://www.firmaniz.com">
+                            <div class="form-text">Firma web sitesinin tam URL'sini girin</div>
+                        </div>
+                        
+                        <div id="manualSection" class="mb-3" style="display:none;">
+                            <div class="mb-3">
+                                <label for="manual_brand_name" class="form-label">Firma Adı</label>
+                                <input type="text" class="form-control" id="manual_brand_name" name="manual_brand_name" placeholder="Firma adını girin">
+                            </div>
+                            <div class="mb-3">
+                                <label for="manual_description" class="form-label">Firma Açıklaması</label>
+                                <textarea class="form-control" id="manual_description" name="manual_description" rows="3" placeholder="Firmanızın ne yaptığını kısaca açıklayın"></textarea>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mb-4 mt-5">Kampanya Bilgileri</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="sector" class="form-label">Sektör</label>
+                                <select class="form-select" id="sector" name="sector" required>
+                                    <option value="" selected disabled>Sektör seçin</option>
+                                    <option value="Perakende">Perakende</option>
+                                    <option value="E-ticaret">E-ticaret</option>
+                                    <option value="Gıda & Restoran">Gıda & Restoran</option>
+                                    <option value="Giyim & Moda">Giyim & Moda</option>
+                                    <option value="Elektronik">Elektronik</option>
+                                    <option value="Ev Dekorasyon">Ev Dekorasyon</option>
+                                    <option value="Kozmetik & Bakım">Kozmetik & Bakım</option>
+                                    <option value="Spor & Fitness">Spor & Fitness</option>
+                                    <option value="Sağlık">Sağlık</option>
+                                    <option value="Eğitim">Eğitim</option>
+                                    <option value="Otomotiv">Otomotiv</option>
+                                    <option value="Otomotiv">Reklamcılık</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="campaign_details" class="form-label">Kampanya Detayı</label>
+                                <textarea class="form-control" id="campaign_details" name="campaign_details" 
+                                    rows="2" placeholder="Kampanyanızın detaylarını kısaca açıklayın. Örn: Yaz sezonuna özel tüm mayo ve bikinilerde indirim" 
+                                    required></textarea>
+                                <div class="char-counter" id="detailsCounter">0/200 karakter</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="campaign_type" class="form-label">Kampanya Türü</label>
+                                <select class="form-select" id="campaign_type" name="campaign_type" required>
+                                    <option value="" selected disabled>Kampanya türü seçin</option>
+                                    <option value="İndirim">İndirim</option>
+                                    <option value="Yeni Ürün">Yeni Ürün</option>
+                                    <option value="Özel Teklif">Özel Teklif</option>
+                                    <option value="Belirli Saatlerde İndirim">Belirli Saatlerde İndirim</option>
+                                    <option value="Son Fırsat">Son Fırsat</option>
+                                    <option value="Sezon Sonu">Sezon Sonu</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="discount_rate" class="form-label">İndirim Oranı (%)</label>
+                                <select class="form-select" id="discount_rate" name="discount_rate" required>
+                                    <option value="" selected disabled>İndirim oranı seçin</option>
+                                    <option value="5">%5</option>
+                                    <option value="10">%10</option>
+                                    <option value="15">%15</option>
+                                    <option value="20">%20</option>
+                                    <option value="25">%25</option>
+                                    <option value="30">%30</option>
+                                    <option value="40">%40</option>
+                                    <option value="50">%50</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="message_tone" class="form-label">Mesaj Dili</label>
+                                <select class="form-select" id="message_tone" name="message_tone" required>
+                                    <option value="" selected disabled>Mesaj dilini seçin</option>
+                                    <option value="Samimi">Samimi</option>
+                                    <option value="Resmi">Resmi</option>
+                                    <option value="Eğlenceli">Eğlenceli</option>
+                                    <option value="Heyecan verici">Heyecan verici</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="sms_count" class="form-label">SMS Sayısı</label>
+                                <select class="form-select" id="sms_count" name="sms_count" required>
+                                    <option value="1">1 SMS (155 karakter)</option>
+                                    <option value="2">2 SMS (310 karakter)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="start_date" class="form-label">Kampanya Başlangıç Tarihi</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date" class="form-label">Kampanya Bitiş Tarihi</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="address" class="form-label">Firma Adresi</label>
+                                <textarea class="form-control" id="address" name="address" rows="2" placeholder="Firma adresini kısaca yazın" required></textarea>
+                                <div class="char-counter" id="addressCounter">0/50 karakter</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">SMS Reklamları Oluştur</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="loader" id="loader"></div>
+                
+                <div class="result-card card p-4" id="resultCard">
+                    <h4 class="mb-4">Oluşturulan SMS Reklamları</h4>
+                    
+                    <div class="mb-3">
+                        <h5>Firma Özeti</h5>
+                        <div id="brandSummary" class="p-3 bg-light rounded"></div>
+                    </div>
+                    
+                    <div id="smsResults"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Veri kaynağı değişimini yönet
+            $('input[name="data_source"]').change(function() {
+                if ($(this).val() === 'url') {
+                    $('#urlSection').show();
+                    $('#manualSection').hide();
+                } else {
+                    $('#urlSection').hide();
+                    $('#manualSection').show();
+                }
+            });
+            
+            // Adres karakter sayacı
+            $('#address').on('input', function() {
+                let count = $(this).val().length;
+                $('#addressCounter').text(count + '/50 karakter');
+                if (count > 50) {
+                    $('#addressCounter').addClass('text-danger');
+                } else {
+                    $('#addressCounter').removeClass('text-danger');
+                }
+            });
+            
+            // Kampanya detayları karakter sayacı
+            $('#campaign_details').on('input', function() {
+                let count = $(this).val().length;
+                $('#detailsCounter').text(count + '/200 karakter');
+                if (count > 200) {
+                    $('#detailsCounter').addClass('text-danger');
+                } else {
+                    $('#detailsCounter').removeClass('text-danger');
+                }
+            });
+            
+            // Form gönderimi
+            $('#smsForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Karakter sınırı kontrollerine kampanya detayını ekle
+                let detailsLength = $('#campaign_details').val().length;
+                if (detailsLength > 200) {
+                    alert('Kampanya detayı 200 karakterden uzun olamaz!');
+                    return;
+                }
+                
+                // Karakter sınırını kontrol et
+                let addressLength = $('#address').val().length;
+                if (addressLength > 50) {
+                    alert('Adres 50 karakterden uzun olamaz!');
+                    return;
+                }
+                
+                // Tarihleri kontrol et
+                let startDate = new Date($('#start_date').val());
+                let endDate = new Date($('#end_date').val());
+                
+                if (endDate < startDate) {
+                    alert('Bitiş tarihi başlangıç tarihinden önce olamaz!');
+                    return;
+                }
+                
+                // Yükleme göstergesini göster
+                $('#loader').show();
+                $('#resultCard').hide();
+                
+                // Form verilerini gönder
+                $.ajax({
+                    url: '/',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#loader').hide();
+                        
+                        // Özet göster
+                        $('#brandSummary').text(response.summary);
+                        
+                        // SMS reklamlarını göster
+                        $('#smsResults').html('');
+                        let smsLines = response.sms_ads.split('\n');
+                        let currentSMS = '';
+                        
+                        smsLines.forEach(function(line) {
+                            if (line.trim() === '') return;
+                            
+                            if (line.match(/^[0-9]+\./)) {
+                                // Yeni SMS başlangıcı
+                                if (currentSMS !== '') {
+                                    $('#smsResults').append(createSMSBox(currentSMS));
+                                }
+                                currentSMS = line;
+                            } else {
+                                currentSMS += '\n' + line;
+                            }
+                        });
+                        
+                        // Son SMS'i ekle
+                        if (currentSMS !== '') {
+                            $('#smsResults').append(createSMSBox(currentSMS));
+                        }
+                        
+                        $('#resultCard').show();
+                        
+                        // Scroll to results
+                        $('html, body').animate({
+                            scrollTop: $("#resultCard").offset().top - 50
+                        }, 500);
+                    },
+                    error: function(error) {
+                        $('#loader').hide();
+                        alert('Hata oluştu: ' + error.responseText);
+                    }
+                });
+            });
+            
+            // SMS kutusu oluştur
+            function createSMSBox(smsText) {
+                let smsContainer = $('<div class="sms-container"></div>');
+                let smsContent = $('<div></div>');
+                
+                // SMS içeriğini satırlara böl
+                let lines = smsText.split('\n');
+                
+                // Her satırı ekle
+                lines.forEach(function(line) {
+                    smsContent.append(line + '<br>');
+                });
+                
+                smsContainer.append(smsContent);
+                
+                return smsContainer;
+            }
+            
+            // Tarihleri bugünden başlat
+            let today = new Date().toISOString().split('T')[0];
+            $('#start_date').val(today);
+            let nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            $('#end_date').val(nextWeek.toISOString().split('T')[0]);
+        });
+    </script>
+</body>
+</html>
